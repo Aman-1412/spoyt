@@ -63,7 +63,8 @@ if __name__ == '__main__':
             required=True
     )) -> None:
         # YOUTUBE MUSIC
-        if urlparse(url).hostname.replace('www.', '') in ('music.youtube.com'):
+        if urlparse(url).hostname.replace('www.', '') == 'music.youtube.com':
+            log.info(f"Received a Youtube Music link - {url}")
             ytm_details = search_youtube_music_by_id(youtube_url_to_id(url))
             youtube_query = '{} {}'.format(ytm_details.title, ' '.join(ytm_details.artists))
             await ctx.defer()
@@ -98,6 +99,7 @@ if __name__ == '__main__':
 
         # YOUTUBE
         if urlparse(url).hostname.replace('www.', '') in ('youtube.com', 'youtu.be'):
+            log.info(f"Received a Youtube video link - {url}")
             youtube_video_id = youtube_url_to_id(url)
             ytm_details = search_youtube_music_by_id(youtube_video_id)
             youtube_query = '{} {}'.format(ytm_details.title, ' '.join(ytm_details.artists))
@@ -136,6 +138,7 @@ if __name__ == '__main__':
             return
 
         # SPOTIFY
+        log.info(f"Received a Spotify link - {url}")
         track_id = url_to_id(url)
         try:
             spotify_track = search_track(track_id)

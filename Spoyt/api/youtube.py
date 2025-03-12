@@ -14,10 +14,10 @@ from Spoyt.settings import YOUTUBE_API_KEY
 class YouTubeVideo:
     def __init__(self, payload: dict) -> None:
         snippet: dict = payload.get('snippet', {})
-        self.video_id: str = payload.get('id', {}).get('videoId')
+        self.video_id: str = payload.get('id' , '') or payload.get('id', {}).get('videoId', '')
         self.title: str = snippet.get('title')
-        self.description: str = snippet.get('description')
-        self.published_date: str = snippet.get('publishTime', '')[:10]
+        self.description: str = snippet.get('description')[:100] + '...'
+        self.published_date: str = snippet.get('publishTime', snippet.get('publishedAt', 'xxxx-xx-xx'))[:10]
 
     @property
     def video_link(self) -> str:
@@ -39,60 +39,64 @@ class YoutubeMusic:
             self.thumbnail: str = yt_search_result['thumbnails'][0]['url'].split('=')[0]
             self.artists: list[str]  = [artist['name'] for artist in yt_search_result['artists']]
 
+
+
+# Priority Order:
+# Video given by user
+# Official Video among the search results
+# Top search result that is an OMV
+# Top search result
+
 def search_video(query: str, given_video_id: str=None) -> YouTubeVideo:
-    log.info(f'Searching YouTube: "{query}"')
-    ytmusic = YTMusic()
-    yt_r = requests_get(
-        'https://www.googleapis.com/youtube/v3/search'
-        '?key={}'
-        '&part=snippet'
-        '&maxResults=5'
-        '&q={}'.format(YOUTUBE_API_KEY, query)
-    )
-    yt_response_json = json_loads(yt_r.content)
+    # If user provided a video, prioritize that
+    if given_video_id:
+        log.info(f'Getting details for YouTube video with id: "{given_video_id}"')
+        yt_r = requests_get(
+            'https://www.googleapis.com/youtube/v3/videos'
+            '?key={}'
+            '&part=snippet'
+            '&id={}'.format(YOUTUBE_API_KEY, given_video_id)
+        )
+        yt_video = json_loads(yt_r.content).get('items', [{}])[0]
 
-    # content = json_loads(yt_r.content)
-    # if (error_code := yt_r.status_code) == 200:
-    #     video = YouTubeVideo(content)
+    else:
+        log.info(f'Searching YouTube: "{query}"')
+        ytmusic = YTMusic()
+        yt_r = requests_get(
+            'https://www.googleapis.com/youtube/v3/search'
+            '?key={}'
+            '&part=snippet'
+            '&maxResults=5'
+            '&q={}'.format(YOUTUBE_API_KEY, query)
+        )
+        yt_response_json = json_loads(yt_r.content)
 
-    omv_videos = []
-    official_video = {}
-    for yt_result in yt_response_json.get('items', [{}]):
-        video_id = yt_result.get('id', {}).get('videoId')
-        # This also returns playlists, ignore those. Only process videos
-        if video_id is None:
-            continue
-        # If user provided a video, prioritize that
-        if video_id == given_video_id:
-            official_video = yt_result
-            break
-        video_type = ytmusic.get_song(video_id)['videoDetails'].get('musicVideoType', '')
-        # Only choose Original Music Video
-        if video_type == 'MUSIC_VIDEO_TYPE_OMV':
-            omv_videos.append(yt_result)
-        # Prioritize Official Video
-        if 'Official Video' in yt_result['snippet']['title']:
-            official_video = yt_result
-            log.info("Found official video")
-            break
+        omv_videos = []
+        official_video = {}
+        for yt_result in yt_response_json.get('items', [{}]):
+            video_id = yt_result.get('id', {}).get('videoId')
+            #  Only process videos. This API also returns playlists and channels, ignore those.
+            if video_id is None:
+                continue
+            video_type = ytmusic.get_song(video_id)['videoDetails'].get('musicVideoType', '')
+            # Only choose Original Music Video
+            if video_type == 'MUSIC_VIDEO_TYPE_OMV':
+                omv_videos.append(yt_result)
+            # Prioritize if the video title contains 'Official Video'
+            if 'Official Video' in yt_result['snippet']['title']:
+                official_video = yt_result
+                log.info("Found official video")
+                break
+        yt_video = official_video if len(official_video) != 0 else yt_response_json.get('items', [{}])[0] if len(omv_videos) == 0 else omv_videos[0]
 
-    # Priority Order:
-    # Video given by user
-    # Official Video
-    # First OMV found in the search result
-    # First search result
-
-    yt_video = official_video if len(official_video) != 0 else yt_response_json.get('items', [{}])[0] if len(omv_videos) == 0 else omv_videos[0]
-
-    content = yt_video
     if (error_code := yt_r.status_code) == 200:
-        video = YouTubeVideo(content)
+        video = YouTubeVideo(yt_video)
         log.info(f'Found YouTube video "{video.title}" ({video.video_link})')
     elif error_code == 403:
-        log.critical(content['error']['message'])
+        log.critical(yt_video['error']['message'])
         raise YouTubeForbiddenException
     else:
-        log.error(content['error']['message'])
+        log.error(yt_video['error']['message'])
         raise YouTubeException
     return video
 
@@ -100,7 +104,7 @@ def search_video(query: str, given_video_id: str=None) -> YouTubeVideo:
 def search_youtube_music_by_name(query: str) -> YoutubeMusic:
     log.info(f'Searching Youtube Music: "{query}"')
     ytmusic = YTMusic()
-    yt_search_results = ytmusic.search(query)[:5]
+    yt_search_results = ytmusic.search(query, filter='songs')[:5]
     yt_search_result = [x for x in yt_search_results if x['videoType'] == 'MUSIC_VIDEO_TYPE_ATV'][0]
 
     log.info(f"Found Youtube Music details for id - {yt_search_result['videoId']}")
