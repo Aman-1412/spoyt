@@ -67,6 +67,8 @@ def url_to_id(url: str) -> str:
     return url.split('?')[0].split('&')[0].split('/')[-1]
 
 
+
+
 def spotify_connect() -> Spotify:
     return Spotify(
         auth_manager=SpotifyClientCredentials(
@@ -89,6 +91,18 @@ def search_track(track_id: str) -> Track:
         raise SpotifyUnreachableException
     return Track(track)
 
+def search_track_by_name_and_artist(track_name, artists):
+    log.info(f'Searching track by name - "{track_name}" and artists - "{artists}"')
+    try:
+        track_url = spotify_connect().search(f"track:{track_name} artist:{artists}")['tracks']['items'][0]['external_urls']['spotify']
+        track: dict | None = spotify_connect().track(track_url)
+        log.info(f"Found track - {track_url}")
+    except SpotifyException:
+        raise SpotifyNotFoundException
+    if not track:
+        log.error('Spotify unreachable')
+        raise SpotifyUnreachableException
+    return Track(track)
 
 def search_playlist(playlist_id: str) -> Playlist:
     log.info(f'Searching playlist by ID "{playlist_id}"')

@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from os import environ
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from Spoyt.logger import log
 
 
 def markdown_url(url: str, text: str = None) -> str:
-    """Wraps URL to be clickable with with optional mask."""
+    """Wraps URL to be clickable with an optional mask."""
     return f'[{text}]({url})' if text else f'<{url}>'
 
 
@@ -20,5 +23,5 @@ def check_env() -> bool:
     ]:
         if key not in environ:
             env_is_valid = False
-            log.critical(f'"{key}" environment varaible is not set')
+            log.critical(f'"{key}" environment variable is not set')
     return env_is_valid

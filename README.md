@@ -1,3 +1,25 @@
+# Changes in the fork
+
+- uv package management
+- env management via .env file (Copy .env.example to .env and fill the values)
+- Track conversions between:
+  - Spotify -> YouTube and YouTube Music
+  - YouTube -> Spotify and YouTube Music
+  - YouTube Music -> Spotify and YouTube
+- (Try to) choose optimal Music and video respectively for YouTube Music and YouTube Video
+- Tried to handle some edge cases around YouTube video detection (may not be 100% accurate)
+- Fixed a couple of typos
+- The code is pretty unoptimized, as it was written in a couple of hours:
+  - no try/excepts where I should have used them lol
+  - no proper type hinting
+  - code duplication
+  - had to use `ctx.defer()` because of long wait times due to multiple YouTube calls
+  - I'll fix these when I have time (inb4: never happening)
+
+
+***
+
+
 # Spoyt
 
 Discord bot that allows you to "convert" Spotify links to YouTube videos.

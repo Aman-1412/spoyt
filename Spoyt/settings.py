@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from os import getenv
 
 BOT_TOKEN: str = getenv('BOT_TOKEN')

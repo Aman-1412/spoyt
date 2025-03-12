@@ -2,12 +2,13 @@
 from discord import Embed, Color
 
 from Spoyt.api.spotify import Playlist, Track
-from Spoyt.api.youtube import YouTubeVideo
+from Spoyt.api.youtube import YouTubeVideo, YoutubeMusic
 from Spoyt.settings import MAX_QUERY
 from Spoyt.utils import markdown_url
 
 
 YOUTUBE_COLOR = Color.from_rgb(255, 0, 0)
+YOUTUBE_MUSIC_COLOR = Color.from_rgb(255, 28, 119)
 
 
 class BaseEmbed(Embed):
@@ -165,8 +166,24 @@ class YouTubeVideoEmbed(BaseEmbed):
             value=video.published_date
         )
 
+class YouTubeMusicEmbed(BaseEmbed):
+    def __init__(self, ytm_result: YoutubeMusic, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.title=ytm_result.title
+        self.description=markdown_url(ytm_result.track_link)
+        self.color = YOUTUBE_MUSIC_COLOR
+        self.set_thumbnail(url=ytm_result.thumbnail)
+        self.add_field(
+            name='Artist{}'.format('' if len(ytm_result.artists) == 1 else 's'),
+            value=', '.join(ytm_result.artists),
+        )
 
-class UnderCunstructionEmbed(BaseEmbed):
+class TitleResponseEmbed(BaseEmbed):
+    def __init__(self, track_details: str, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.title = track_details
+
+class UnderConstructionEmbed(BaseEmbed):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.title = 'Function under construction'
