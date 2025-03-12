@@ -66,8 +66,9 @@ if __name__ == '__main__':
         if urlparse(url).hostname.replace('www.', '') in ('youtube.com', 'youtu.be', 'music.youtube.com'):
             ytm_details = search_youtube_music_by_id(youtube_url_to_id(url))
             youtube_query = '{} {}'.format(ytm_details.title, ' '.join(ytm_details.artists))
-            ytm_details = search_youtube_music_by_name(youtube_query)
             await ctx.defer()
+            ytm_details = search_youtube_music_by_name(youtube_query)
+
 
             try:
                 spotify_track = search_track_by_name_and_artist(ytm_details.title, " ,".join(ytm_details.artists))

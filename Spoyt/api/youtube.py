@@ -69,7 +69,7 @@ def search_video(query: str) -> YouTubeVideo:
             log.info("Found official video")
             break
 
-    yt_video = official_video if len(official_video) != 0 else yt_response_json[0] if len(required_yt_results) == 0 else required_yt_results[0]
+    yt_video = official_video if len(official_video) != 0 else yt_response_json.get('items', [{}])[0] if len(required_yt_results) == 0 else required_yt_results[0]
 
     content = yt_video
     if (error_code := yt_r.status_code) == 200:
