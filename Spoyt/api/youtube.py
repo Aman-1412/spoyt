@@ -14,7 +14,7 @@ from Spoyt.settings import YOUTUBE_API_KEY
 class YouTubeVideo:
     def __init__(self, payload: dict) -> None:
         snippet: dict = payload.get('snippet', {})
-        self.video_id: str = payload.get('id' , '') or payload.get('id', {}).get('videoId', '')
+        self.video_id: str = payload.get('id', {}).get('videoId', '')
         self.title: str = snippet.get('title')
         self.description: str = snippet.get('description')[:100] + '...'
         self.published_date: str = snippet.get('publishTime', snippet.get('publishedAt', 'xxxx-xx-xx'))[:10]
@@ -58,6 +58,7 @@ def search_video(query: str, given_video_id: str=None) -> YouTubeVideo:
             '&id={}'.format(YOUTUBE_API_KEY, given_video_id)
         )
         yt_video = json_loads(yt_r.content).get('items', [{}])[0]
+        yt_video['id'] = {'videoId': yt_video['id']}
 
     else:
         log.info(f'Searching YouTube: "{query}"')

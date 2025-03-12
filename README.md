@@ -6,8 +6,9 @@
   - Spotify -> YouTube and YouTube Music
   - YouTube -> Spotify and YouTube Music
   - YouTube Music -> Spotify and YouTube
-- (Try to) choose optimal Music and video respectively for YouTube Music and YouTube Video
-- Tried to handle some edge cases around YouTube video detection (may not be 100% accurate)
+- (Try to) choose optimal Music and Video respectively for YouTube Music and YouTube Video
+- Handle some edge cases around YouTube video detection (may not be 100% accurate)
+- Better thumbnails for each platform
 - Fixed a couple of typos
 - The code is pretty unoptimized, as it was written in a couple of hours:
   - no try/excepts where I should have used them lol
