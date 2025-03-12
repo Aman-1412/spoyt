@@ -39,7 +39,7 @@ class YoutubeMusic:
             self.thumbnail: str = yt_search_result['thumbnails'][0]['url'].split('=')[0]
             self.artists: list[str]  = [artist['name'] for artist in yt_search_result['artists']]
 
-def search_video(query: str) -> YouTubeVideo:
+def search_video(query: str, given_video_id: str=None) -> YouTubeVideo:
     log.info(f'Searching YouTube: "{query}"')
     ytmusic = YTMusic()
     yt_r = requests_get(
@@ -55,21 +55,34 @@ def search_video(query: str) -> YouTubeVideo:
     # if (error_code := yt_r.status_code) == 200:
     #     video = YouTubeVideo(content)
 
-    required_yt_results = []
+    omv_videos = []
     official_video = {}
     for yt_result in yt_response_json.get('items', [{}]):
         video_id = yt_result.get('id', {}).get('videoId')
+        # This also returns playlists, ignore those. Only process videos
         if video_id is None:
             continue
+        # If user provided a video, prioritize that
+        if video_id == given_video_id:
+            official_video = yt_result
+            break
         video_type = ytmusic.get_song(video_id)['videoDetails'].get('musicVideoType', '')
+        # Only choose Original Music Video
         if video_type == 'MUSIC_VIDEO_TYPE_OMV':
-            required_yt_results.append(yt_result)
+            omv_videos.append(yt_result)
+        # Prioritize Official Video
         if 'Official Video' in yt_result['snippet']['title']:
             official_video = yt_result
             log.info("Found official video")
             break
 
-    yt_video = official_video if len(official_video) != 0 else yt_response_json.get('items', [{}])[0] if len(required_yt_results) == 0 else required_yt_results[0]
+    # Priority Order:
+    # Video given by user
+    # Official Video
+    # First OMV found in the search result
+    # First search result
+
+    yt_video = official_video if len(official_video) != 0 else yt_response_json.get('items', [{}])[0] if len(omv_videos) == 0 else omv_videos[0]
 
     content = yt_video
     if (error_code := yt_r.status_code) == 200:

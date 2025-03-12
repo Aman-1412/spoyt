@@ -62,13 +62,11 @@ if __name__ == '__main__':
             description='Starts with "https://open.spotify.com/track/..."',
             required=True
     )) -> None:
-        # YOUTUBE
-        if urlparse(url).hostname.replace('www.', '') in ('youtube.com', 'youtu.be', 'music.youtube.com'):
+        # YOUTUBE MUSIC
+        if urlparse(url).hostname.replace('www.', '') in ('music.youtube.com'):
             ytm_details = search_youtube_music_by_id(youtube_url_to_id(url))
             youtube_query = '{} {}'.format(ytm_details.title, ' '.join(ytm_details.artists))
             await ctx.defer()
-            ytm_details = search_youtube_music_by_name(youtube_query)
-
 
             try:
                 spotify_track = search_track_by_name_and_artist(ytm_details.title, " ,".join(ytm_details.artists))
@@ -89,6 +87,40 @@ if __name__ == '__main__':
 
             # await ctx.respond("\u200b")
             # await ctx.respond(f"{" ,".join(ytm_details.artists)} - {ytm_details.title}")
+
+            await ctx.respond(embed=TitleResponseEmbed(f"{' ,'.join(spotify_track.artists)} - {spotify_track.name}"))
+
+            await ctx.channel.send(embed=YouTubeMusicEmbed(ytm_details))
+            await ctx.channel.send(embed=YouTubeVideoEmbed(youtube_result))
+            await ctx.channel.send(embed=SpotifyTrackEmbed(spotify_track))
+
+            return
+
+        # YOUTUBE
+        if urlparse(url).hostname.replace('www.', '') in ('youtube.com', 'youtu.be'):
+            youtube_video_id = youtube_url_to_id(url)
+            ytm_details = search_youtube_music_by_id(youtube_video_id)
+            youtube_query = '{} {}'.format(ytm_details.title, ' '.join(ytm_details.artists))
+            await ctx.defer()
+            ytm_details = search_youtube_music_by_name(youtube_query)
+
+
+            try:
+                spotify_track = search_track_by_name_and_artist(ytm_details.title, " ,".join(ytm_details.artists))
+            except SpotifyNotFoundException:
+                await ctx.respond(embed=SpotifyTrackNotFoundEmbed())
+                return
+            except SpotifyUnreachableException:
+                await ctx.respond(embed=SpotifyUnreachableEmbed())
+                return
+
+            try:
+                youtube_result = search_video(youtube_query, given_video_id=youtube_video_id)
+            except YouTubeException as e:
+                await ctx.channel.send(embed=ErrorEmbed(
+                    description=f'```diff\n- {e}\n```'
+                ))
+                return
 
             await ctx.respond(embed=TitleResponseEmbed(f"{' ,'.join(spotify_track.artists)} - {spotify_track.name}"))
 
