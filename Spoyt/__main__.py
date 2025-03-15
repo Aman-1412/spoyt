@@ -95,6 +95,8 @@ if __name__ == '__main__':
             await ctx.channel.send(embed=YouTubeVideoEmbed(youtube_result))
             await ctx.channel.send(embed=SpotifyTrackEmbed(spotify_track))
 
+            log.info(f'Successfully converted {url}')
+
             return
 
         # YOUTUBE
@@ -132,6 +134,8 @@ if __name__ == '__main__':
             await ctx.channel.send(embed=YouTubeMusicEmbed(ytm_details))
             await ctx.channel.send(embed=YouTubeVideoEmbed(youtube_result))
             await ctx.channel.send(embed=SpotifyTrackEmbed(spotify_track))
+
+            log.info(f'Successfully converted {url}')
 
             return
 
@@ -175,7 +179,7 @@ if __name__ == '__main__':
         await ctx.channel.send(embed=YouTubeVideoEmbed(youtube_result))
         await ctx.channel.send(embed=SpotifyTrackEmbed(spotify_track))
 
-        log.info(f'Successfully converted "{track.name}" track')
+        log.info(f'Successfully converted {url}')
 
     @bot.slash_command(
         name='playlist',
