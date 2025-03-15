@@ -7,7 +7,7 @@ class SpoytException(BaseException):
 
 class YouTubeException(SpoytException):
     def __init__(self, traceback='') -> None:
-        message = 'There was an error during querying YouTube.'
+        message = 'There was an error querying YouTube.'
         SpoytException.__init__(self, f'{__class__.__name__}: {traceback or message}')
 
 
@@ -19,7 +19,7 @@ class YouTubeForbiddenException(YouTubeException):
 
 class SpotifyException(SpoytException):
     def __init__(self, traceback='') -> None:
-        message = 'There was an error during querying Spotify.'
+        message = 'There was an error querying Spotify.'
         SpoytException.__init__(self, f'{__class__.__name__}: {traceback or message}')
 
 

@@ -2,14 +2,21 @@
 from typing import Optional
 from urllib.parse import parse_qs, urlparse
 from json import loads as json_loads
+from pathlib import Path
 
 from requests import get as requests_get
-from ytmusicapi import YTMusic
+from ytmusicapi import YTMusic, OAuthCredentials
 
 from Spoyt.exceptions import YouTubeException, YouTubeForbiddenException
 from Spoyt.logger import log
-from Spoyt.settings import YOUTUBE_API_KEY
+from Spoyt.settings import YOUTUBE_API_KEY, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET
 
+if Path("oauth.json").exists():
+    log.info("Found oauth.json")
+    ytmusic = YTMusic("oauth.json", oauth_credentials=OAuthCredentials(client_id=OAUTH_CLIENT_ID, client_secret=OAUTH_CLIENT_SECRET))
+else:
+    log.info("No auth.json found. Skipping auth")
+    ytmusic = YTMusic()
 
 class YouTubeVideo:
     def __init__(self, payload: dict) -> None:
@@ -62,7 +69,6 @@ def search_video(query: str, given_video_id: str=None) -> YouTubeVideo:
 
     else:
         log.info(f'Searching YouTube: "{query}"')
-        ytmusic = YTMusic()
         yt_r = requests_get(
             'https://www.googleapis.com/youtube/v3/search'
             '?key={}'
@@ -104,7 +110,6 @@ def search_video(query: str, given_video_id: str=None) -> YouTubeVideo:
 
 def search_youtube_music_by_name(query: str) -> YoutubeMusic:
     log.info(f'Searching Youtube Music: "{query}"')
-    ytmusic = YTMusic()
     yt_search_results = ytmusic.search(query, filter='songs')[:5]
     yt_search_result = [x for x in yt_search_results if x['videoType'] == 'MUSIC_VIDEO_TYPE_ATV'][0]
 
@@ -113,7 +118,6 @@ def search_youtube_music_by_name(query: str) -> YoutubeMusic:
 
 def search_youtube_music_by_id(video_id: str):
     log.info(f"Searching Youtube Music for id - {video_id}")
-    ytmusic = YTMusic()
 
     ytm_track_details = ytmusic.get_song(video_id)
     ytm_details  = YoutubeMusic()

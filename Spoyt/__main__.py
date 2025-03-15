@@ -65,9 +65,9 @@ if __name__ == '__main__':
         # YOUTUBE MUSIC
         if urlparse(url).hostname.replace('www.', '') == 'music.youtube.com':
             log.info(f"Received a Youtube Music link - {url}")
+            await ctx.defer()
             ytm_details = search_youtube_music_by_id(youtube_url_to_id(url))
             youtube_query = '{} {}'.format(ytm_details.title, ' '.join(ytm_details.artists))
-            await ctx.defer()
 
             try:
                 spotify_track = search_track_by_name_and_artist(ytm_details.title, " ,".join(ytm_details.artists))
@@ -100,10 +100,13 @@ if __name__ == '__main__':
         # YOUTUBE
         if urlparse(url).hostname.replace('www.', '') in ('youtube.com', 'youtu.be'):
             log.info(f"Received a Youtube video link - {url}")
-            youtube_video_id = youtube_url_to_id(url)
-            ytm_details = search_youtube_music_by_id(youtube_video_id)
-            youtube_query = '{} {}'.format(ytm_details.title, ' '.join(ytm_details.artists))
             await ctx.defer()
+            youtube_video_id = youtube_url_to_id(url)
+            # Search YouTube Music for the YouTube video
+            ytm_details = search_youtube_music_by_id(youtube_video_id)
+
+            # Search again, we rely on YouTube Music to give us the correct song
+            youtube_query = '{} {}'.format(ytm_details.title, ' '.join(ytm_details.artists))
             ytm_details = search_youtube_music_by_name(youtube_query)
 
 
@@ -139,6 +142,7 @@ if __name__ == '__main__':
 
         # SPOTIFY
         log.info(f"Received a Spotify link - {url}")
+        await ctx.defer()
         track_id = url_to_id(url)
         try:
             spotify_track = search_track(track_id)
@@ -157,7 +161,7 @@ if __name__ == '__main__':
                 description=f'```diff\n- {e}\n```'
             ))
             return
-        await ctx.defer()
+
         try:
             ytm_details = search_youtube_music_by_name(youtube_query)
         except YouTubeException as e:
