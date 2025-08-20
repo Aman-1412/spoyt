@@ -7,7 +7,7 @@ from pathlib import Path
 from requests import get as requests_get
 from ytmusicapi import YTMusic, OAuthCredentials
 
-from Spoyt.exceptions import YouTubeException, YouTubeForbiddenException
+from Spoyt.exceptions import YouTubeException, YouTubeForbiddenException, YouTubeURLException
 from Spoyt.logger import log
 from Spoyt.settings import YOUTUBE_API_KEY, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET
 
@@ -116,7 +116,7 @@ def search_youtube_music_by_name(query: str) -> YoutubeMusic:
     yt_search_results = ytmusic.search(query, filter='songs')[:5]
     yt_search_result = [x for x in yt_search_results if x['videoType'] == 'MUSIC_VIDEO_TYPE_ATV'][0]
 
-    log.info(f"Found Youtube Music details for id - {yt_search_result['videoId']}")
+    log.info(f"Found YouTube Music details for id - {yt_search_result['videoId']}")
     return YoutubeMusic(yt_search_result)
 
 def search_youtube_music_by_id(video_id: str):
@@ -129,10 +129,16 @@ def search_youtube_music_by_id(video_id: str):
     ytm_details.artists = ytm_track_details['videoDetails']['author'].split(' & ')
     ytm_details.thumbnail = ytm_track_details['videoDetails']['thumbnail']['thumbnails'][0]['url'].split('=')[0]
 
-    log.info(f"Found Youtube Music details for link - {ytm_details.track_link}")
+    log.info(f"Found YouTube Music details for link - {ytm_details.track_link}")
     return ytm_details
 
 
 def youtube_url_to_id(url: str) -> str:
-    log.info(f"Converting youtube url - {url} to id")
-    return parse_qs(urlparse(url).query)["v"][0]
+    log.info(f"Converting YouTube url - {url} to id")
+    parsed_url = urlparse(url)
+    if parsed_url.hostname.replace('www.', '') == 'youtube.com':
+        return parse_qs(parsed_url.query)["v"][0]
+    elif parsed_url.hostname.replace('www.', '') == 'youtu.be':
+        return parsed_url.path[1:]
+    else:
+        raise YouTubeURLException(f"Invalid YouTube url - {url}")
