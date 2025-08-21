@@ -136,7 +136,7 @@ def search_youtube_music_by_id(video_id: str):
 def youtube_url_to_id(url: str) -> str:
     log.info(f"Converting YouTube url - {url} to id")
     parsed_url = urlparse(url)
-    if parsed_url.hostname.replace('www.', '') == 'youtube.com':
+    if 'youtube.com' in parsed_url.hostname.replace('www.', ''):
         return parse_qs(parsed_url.query)["v"][0]
     elif parsed_url.hostname.replace('www.', '') == 'youtu.be':
         return parsed_url.path[1:]
