@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import html
 from typing import Optional
 from urllib.parse import parse_qs, urlparse
 from json import loads as json_loads
@@ -23,7 +24,7 @@ class YouTubeVideo:
     def __init__(self, payload: dict) -> None:
         snippet: dict = payload.get('snippet', {})
         self.video_id: str = payload.get('id', {}).get('videoId', '')
-        self.title: str = snippet.get('title')
+        self.title: str = html.unescape(snippet.get('title'))
         self.description: str = snippet.get('description')[:100] + '...'
         self.published_date: str = snippet.get('publishTime', snippet.get('publishedAt', 'xxxx-xx-xx'))[:10]
 
@@ -43,7 +44,7 @@ class YoutubeMusic:
         else:
             self.track_id: str = yt_search_result['videoId']
             self.track_link: str = f"https://music.youtube.com/watch?v={self.track_id}"
-            self.title: str = yt_search_result['title']
+            self.title: str = html.unescape(yt_search_result['title'])
             self.thumbnail: str = yt_search_result['thumbnails'][0]['url'].split('=')[0]
             self.artists: list[str]  = [artist['name'] for artist in yt_search_result['artists']]
 
@@ -125,7 +126,7 @@ def search_youtube_music_by_id(video_id: str):
     ytm_details  = YoutubeMusic()
     ytm_details.track_id = video_id
     ytm_details.track_link = f"https://music.youtube.com/watch?v={video_id}"
-    ytm_details.title = ytm_track_details['videoDetails']['title']
+    ytm_details.title = html.unescape(ytm_track_details['videoDetails']['title'])
     ytm_details.artists = ytm_track_details['videoDetails']['author'].split(' & ')
     ytm_details.thumbnail = ytm_track_details['videoDetails']['thumbnail']['thumbnails'][0]['url'].split('=')[0]
 
