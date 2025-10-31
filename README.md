@@ -17,6 +17,10 @@
   - had to use `ctx.defer()` because of long wait times due to multiple YouTube calls
   - I'll fix these when I have time (inb4: never happening)
 
+### Run:
+```
+uv run -m Spoyt 2>&1 | tee logs/output.log
+```
 
 ***
 
