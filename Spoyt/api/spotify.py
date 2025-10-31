@@ -94,7 +94,10 @@ def search_track(track_id: str) -> Track:
 def search_track_by_name_and_artist(track_name, artists):
     log.info(f'Searching track by name - "{track_name}" and artists - "{artists}"')
     try:
-        track_url = spotify_connect().search(f"track:{track_name} artist:{artists}")['tracks']['items'][0]['external_urls']['spotify']
+        track_items = spotify_connect().search(f"track:{track_name} artist:{artists}")["tracks"]["items"]
+        if not track_items:
+            track_items = spotify_connect().search(f"track:{track_name} artist:{artists.split(',')[0].strip()}")['tracks']['items']
+        track_url = track_items[0]['external_urls']['spotify']
         track: dict | None = spotify_connect().track(track_url)
         log.info(f"Found track - {track_url}")
     except SpotifyException:

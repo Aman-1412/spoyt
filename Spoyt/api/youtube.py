@@ -10,12 +10,14 @@ from ytmusicapi import YTMusic, OAuthCredentials
 
 from Spoyt.exceptions import YouTubeException, YouTubeForbiddenException, YouTubeURLException
 from Spoyt.logger import log
-from Spoyt.settings import YOUTUBE_API_KEY, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET
+from Spoyt.settings import YOUTUBE_API_KEY, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, YOUTUBE_MUSIC_BROWSER_OVERRIDE
 
-if Path("oauth.json").exists():
+if YOUTUBE_MUSIC_BROWSER_OVERRIDE:
+    ytmusic = YTMusic("browser.json")
+
+elif Path("oauth.json").exists():
     log.info("Found oauth.json")
-    ytmusic = YTMusic("oauth.json", oauth_credentials=OAuthCredentials(client_id=OAUTH_CLIENT_ID,
-                                                                       client_secret=OAUTH_CLIENT_SECRET))
+    ytmusic = YTMusic("oauth.json", oauth_credentials=OAuthCredentials(client_id=OAUTH_CLIENT_ID,                                                                       client_secret=OAUTH_CLIENT_SECRET))
 else:
     log.info("No auth.json found. Skipping auth")
     ytmusic = YTMusic()
