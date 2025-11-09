@@ -94,6 +94,7 @@ if __name__ == '__main__':
             await ctx.channel.send(embed=YouTubeMusicEmbed(ytm_details))
             await ctx.channel.send(embed=YouTubeVideoEmbed(youtube_result))
             await ctx.channel.send(embed=SpotifyTrackEmbed(spotify_track))
+            await ctx.channel.send(spotify_track.track_url)
 
             log.info(f'Successfully converted {url}')
 
@@ -134,6 +135,7 @@ if __name__ == '__main__':
             await ctx.channel.send(embed=YouTubeMusicEmbed(ytm_details))
             await ctx.channel.send(embed=YouTubeVideoEmbed(youtube_result))
             await ctx.channel.send(embed=SpotifyTrackEmbed(spotify_track))
+            await ctx.channel.send(spotify_track.track_url)
 
             log.info(f'Successfully converted {url}')
 
@@ -178,6 +180,7 @@ if __name__ == '__main__':
         await ctx.channel.send(embed=YouTubeMusicEmbed(ytm_details))
         await ctx.channel.send(embed=YouTubeVideoEmbed(youtube_result))
         await ctx.channel.send(embed=SpotifyTrackEmbed(spotify_track))
+        await ctx.channel.send(spotify_track.track_url)
 
         log.info(f'Successfully converted {url}')
 
